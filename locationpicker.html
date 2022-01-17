@@ -1,0 +1,77 @@
+<html>
+  <head>
+    <title>Example OSM LocationPicker</title>
+        
+    <script type="text/javascript" src="http://www.openlayers.org/api/OpenLayers.js"></script>
+    <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+        
+    <script>
+    
+    function handler(request) {
+        document.getElementById("poiAddress").value = request.responseText;
+    }
+    
+    function init(){
+        var latitude = 53.07621;
+        var longitude = 8.80755;
+
+        var proj4326 = new OpenLayers.Projection("EPSG:4326");
+        var projmerc = new OpenLayers.Projection("EPSG:900913");
+
+        var mapCenterPositionAsLonLat = new OpenLayers.LonLat(longitude, latitude);
+        var mapCenterPositionAsMercator = mapCenterPositionAsLonLat.transform(proj4326, projmerc);
+        var mapZoom = 15;
+
+        osmMap = new OpenLayers.Map("locationPickerMap", {
+                controls: [
+                            new OpenLayers.Control.KeyboardDefaults(),
+                            new OpenLayers.Control.Navigation(),
+                            new OpenLayers.Control.LayerSwitcher({'ascending':false}),
+                            new OpenLayers.Control.PanZoomBar(),
+                            new OpenLayers.Control.MousePosition()
+                ],
+                maxExtent:
+                    new OpenLayers.Bounds(-20037508.34,-20037508.34,
+                                           20037508.34, 20037508.34),
+                numZoomLevels: 18,
+                maxResolution: 156543,
+                units: 'm',
+                projection: projmerc,
+                displayProjection: proj4326
+        } );
+
+        var osmLayer = new OpenLayers.Layer.OSM("OpenStreetMap");
+        osmMap.addLayer(osmLayer);
+
+        osmMap.setCenter(mapCenterPositionAsMercator, mapZoom);
+        
+        var locationPickerLayer = new OpenLayers.Layer.Vector("LocationPicker Marker");
+        osmMap.addLayer(locationPickerLayer);
+        
+        var locationPickerPoint = new OpenLayers.Geometry.Point(mapCenterPositionAsMercator.lon, mapCenterPositionAsMercator.lat);
+        var locationPickerMarkerStyle = {externalGraphic: 'https://www.iconsdb.com/icons/preview/red/pin-xxl.png', graphicHeight: 37, graphicWidth: 32, graphicYOffset: -37, graphicXOffset: -16 };
+        var locationPickerVector = new OpenLayers.Feature.Vector(locationPickerPoint, null, locationPickerMarkerStyle);
+        locationPickerLayer.addFeatures(locationPickerVector);
+        
+        var dragFeature = new OpenLayers.Control.DragFeature(locationPickerLayer, 
+                {
+                    onComplete:    function( feature, pixel ) {
+                        var selectedPositionAsMercator = new OpenLayers.LonLat(locationPickerPoint.x, locationPickerPoint.y);
+                        var selectedPositionAsLonLat = selectedPositionAsMercator.transform(projmerc, proj4326);
+
+                                  window.location.href = "shortcuts://run-shortcut?Name=GeoGuessr&input=" + selectedPositionAsLonLat.lon+" "+ selectedPositionAsLonLat.lat
+
+                    }
+                   }
+        );
+        osmMap.addControl(dragFeature);
+        dragFeature.activate();
+        
+    }
+
+    </script>
+  </head>
+  <body onload="init();">
+       <div id="locationPickerMap" style="width:1500px; height:1500px; float: left;"></div>
+  </body>
+</html>
