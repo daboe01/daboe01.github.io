@@ -49,7 +49,7 @@
         osmMap.addLayer(locationPickerLayer);
         
         var locationPickerPoint = new OpenLayers.Geometry.Point(mapCenterPositionAsMercator.lon, mapCenterPositionAsMercator.lat);
-        var locationPickerMarkerStyle = {externalGraphic: 'https://www.iconsdb.com/icons/preview/red/pin-xxl.png', graphicHeight: 37, graphicWidth: 32, graphicYOffset: -37, graphicXOffset: -16 };
+        var locationPickerMarkerStyle = {externalGraphic: '/pin-xxl.png', graphicHeight: 37, graphicWidth: 32, graphicYOffset: -37, graphicXOffset: -16 };
         var locationPickerVector = new OpenLayers.Feature.Vector(locationPickerPoint, null, locationPickerMarkerStyle);
         locationPickerLayer.addFeatures(locationPickerVector);
         
